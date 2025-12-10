@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Selamat Ulang Tahun, Denta!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#FFFBF2;
+      --card:#fff;
+      --accent:#FF7AB6; /* pink */
+      --accent-2:#FFD37A; /* yellow */
+      --muted:#6B6B6B;
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; margin:0; background:linear-gradient(180deg,var(--bg),#FFF7F9); min-height:100vh; color:#333}
+
+    .center{display:flex;align-items:center;justify-content:center}
+
+    header{padding:28px 20px;text-align:center}
+    .title{font-size:28px;font-weight:700;color:var(--accent);letter-spacing:0.4px}
+    .subtitle{color:var(--muted);margin-top:6px}
+
+    .card{max-width:980px;margin:18px auto;background:var(--card);border-radius:18px;padding:18px;box-shadow:0 8px 30px rgba(255,118,168,0.12);overflow:hidden}
+
+    .hero{display:flex;gap:18px;align-items:center;padding:10px}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .hero-info{flex:1}
+    .name{font-size:20px;font-weight:700}
+    .age{color:var(--muted);margin-top:4px}
+
+    .buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{background:var(--accent);border:none;color:white;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(255,122,182,0.12)}
+    .btn.secondary{background:transparent;color:var(--accent);border:2px solid rgba(255,122,182,0.12)}
+
+    /* greeting overlay */
+    .overlay{position:fixed;inset:0;background:rgba(6,6,6,0.35);display:flex;align-items:center;justify-content:center;padding:20px}
+    .greet-card{background:linear-gradient(180deg,#FFF,#FFF7F9);padding:22px;border-radius:16px;max-width:780px;box-shadow:0 18px 60px rgba(0,0,0,0.18);text-align:center}
+    .greet-card h1{font-size:30px;margin:6px 0;color:var(--accent)}
+    .greet-card p{color:var(--muted);margin:8px 0 14px}
+    .greet-card .open-btn{background:var(--accent-2);border:none;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer}
+
+    /* game area */
+    .game-wrap{padding:18px;border-radius:12px;background:linear-gradient(180deg,#FFF,#FFF9F6);margin-top:12px}
+    .game-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .score{font-weight:700}
+    .game-canvas{position:relative;height:380px;border-radius:12px;background:linear-gradient(180deg,#FFF9FF,#FFF);overflow:hidden;border:2px dashed rgba(255,122,182,0.12)}
+
+    .star{position:absolute;width:46px;height:46px;border-radius:10px;display:grid;place-items:center;font-size:24px;user-select:none;cursor:pointer;transform:translateZ(0);}
+
+    .footer{display:flex;justify-content:space-between;align-items:center;padding:12px 6px;margin-top:10px}
+
+    /* cake reveal */
+    .reveal{display:none;flex-direction:column;align-items:center;gap:8px;padding:14px}
+    .cake{width:140px;height:140px;border-radius:12px;background:linear-gradient(180deg,#FFEEFF,#FFECEC);display:grid;place-items:center;font-size:64px}
+
+    /* responsive */
+    @media(min-width:800px){.hero{padding:24px}.avatar{width:140px;height:140px;border-radius:20px;font-size:48px}}
+
+    /* small confetti pieces */
+    canvas.confetti{position:absolute;inset:0;pointer-events:none}
+
+    /* Footer Styling */
+    .page-footer { background-color: rgba(105, 105, 105, 0.2); padding: 1.5rem 1rem; margin-top: 3rem; text-align: center; }
+    .page-footer .footer-text { font-family: 'Amatic SC', cursive; font-size: 1.2rem; color: red; margin-bottom: 0.5rem; }
+    .page-footer .thanks-text { font-size: 1.5rem; color: #eee; font-weight: bold; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">Kado Spesial untuk Denta Pusu Damuyang Widi</div>
+    <div class="subtitle">(^_^)</div>
+  </header>
+
+  <main class="card">
+    <div class="hero">
+      <div class="avatar">
+        <img src="Imaged.jpg" alt="Foto Denta" class="avatar-img">
+      </div>
+      <div class="hero-info">
+        <div class="name">Denta Pusu Damuyang Widi</div>
+        <div class="age">Umur: 5 tahun</div>
+        <div class="buttons">
+          <button class="btn" id="openGreet">Buka Kado Ucapan 🎉</button>
+          <button class="btn secondary" id="playBtn">Mainkan Mini-Game ⭐</button>
+          <button class="btn secondary" id="toggleMusic">Nyalakan Musik</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-wrap">
+      <div class="game-head">
+        <div class="score">Bintang terkumpul: <span id="score">0</span>/10</div>
+        <div class="hint">Klik bintang yang jatuh. Kumpulkan 10 untuk melihat kejutan!</div>
+      </div>
+
+      <div class="game-canvas center" id="gameArea">
+        <canvas class="confetti" id="confettiCanvas"></canvas>
+        <!-- star elements will be injected here -->
+      </div>
+
+      <div class="footer">
+        <div class="muted">Untuk Denta, semoga hari ulang tahunmu penuh tawa! 🧁</div>
+        <div>— Dari Abang Brian</div>
+      </div>
+
+      <div class="reveal center" id="revealBox">
+        <img src="panda.png" id="animasi"widht="80"height="100">
+        <div class="cake">🎂</div>
+        <div style="text-align:center">
+          <h2>Selamat Ulang Tahun, Denta!</h2>
+          <p>Semoga tumbuh sehat, ceria, dan selalu penuh petualangan.^_^💖</p>
+          <a href="https://wa.me/+6285755498964"><span>༼ つ ◕_◕ ༽つ   Kirim Balasan<br> Ya   ☜(ﾟヮﾟ☜)</span></a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- greeting overlay (initially hidden) -->
+  <div class="overlay" id="greetOverlay" style="display:none">
+    <div class="greet-card">
+      <h1>Happy 5th Birthday, Denta! 🥳</h1>
+      <p>Hai Denta! Semoga harimu spesial—kue, balon, dan beribu senyum menantimu hari ini.</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+        <button class="open-btn" id="closeGreet">Mainkan Gamenya^_^</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bgAudio" loop src="" preload="auto"></audio>
+  <footer class="page-footer">
+    <p class="footer-text">
+        -Copyright©2025 / Emovelid (BrianZRF)<br>
+        Supported by SHST
+    </p>
+  </footer>
+
+  <script>
+    // --- personalized variables ---
+    const name = 'Denta Pusu Damuyang Widi';
+    const targetCount = 10;
+
+    // --- DOM refs ---
+    const openGreet = document.getElementById('openGreet');
+    const greetOverlay = document.getElementById('greetOverlay');
+    const closeGreet = document.getElementById('closeGreet');
+    const playBtn = document.getElementById('playBtn');
+    const gameArea = document.getElementById('gameArea');
+    const scoreEl = document.getElementById('score');
+    const revealBox = document.getElementById('revealBox');
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const toggleMusic = document.getElementById('toggleMusic');
+    const bgAudio = document.getElementById('bgAudio');
+
+    // small built-in cheerful melody (generated as data URI) - optional
+    // We'll use a very short base64-encoded audio (a tiny beep loop) to avoid external files.
+    // For better experience replace src with a real happy birthday tune hosted by you.
+    const tinyBeepData = 'sisi.mp3'; // silent short clip
+    bgAudio.src = tinyBeepData;
+
+    // show greet overlay
+    openGreet.addEventListener('click', ()=>{ greetOverlay.style.display = 'flex'; });
+    closeGreet.addEventListener('click', ()=>{ greetOverlay.style.display = 'none'; startConfetti(100); });
+
+    // music toggle
+    let musicOn = false;
+    toggleMusic.addEventListener('click', ()=>{
+      musicOn = !musicOn;
+      if(musicOn){ bgAudio.play().catch(()=>{}); toggleMusic.textContent='Matikan Musik'; }
+      else{ bgAudio.pause(); toggleMusic.textContent='Nyalakan Musik'; }
+    });
+
+    // --- game logic ---
+    let score = 0;
+    let running = false;
+    let spawnInterval = null;
+    const areaRect = ()=>gameArea.getBoundingClientRect();
+
+    function random(min,max){return Math.random()*(max-min)+min}
+
+    function createStar(){
+      const star = document.createElement('div');
+      star.className='star';
+      // random pastel background
+      const colors = ['#FFD37A','#FFB3D6','#C9EAFF','#D7FFC7','#FFE3B8'];
+      star.style.background = colors[Math.floor(Math.random()*colors.length)];
+      star.style.left = (Math.random()*80+5) + '%';
+      star.style.top = '-60px';
+      star.innerHTML = '⭐';
+      gameArea.appendChild(star);
+
+      // falling animation using JS
+      const speed = random(40,90); // px per second
+      let top = -60;
+      let last = performance.now();
+      let alive = true;
+
+      function frame(now){
+        const dt = (now-last)/1000; last = now;
+        top += speed*dt;
+        star.style.top = top+'px';
+        if(top > gameArea.clientHeight + 60){ // remove
+          alive = false; star.remove();
+        }
+        if(alive) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+
+      star.addEventListener('click', ()=>{
+        if(!alive) return;
+        alive = false;
+        // pop effect
+        star.style.transition = 'transform 260ms ease, opacity 260ms ease';
+        star.style.transform = 'scale(1.3) rotate(20deg)';
+        star.style.opacity = '0';
+        setTimeout(()=>star.remove(),300);
+        incrementScore();
+      });
+    }
+
+    function startGame(){
+      if(running) return;
+      running = true; score = 0; scoreEl.textContent = score; revealBox.style.display='none';
+      spawnInterval = setInterval(()=>{ createStar(); }, 700);
+      // spawn a few immediately
+      for(let i=0;i<4;i++) setTimeout(createStar, i*250);
+    }
+
+    function stopGame(){
+      running = false; clearInterval(spawnInterval);
+      // remove remaining stars
+      document.querySelectorAll('.star').forEach(s=>s.remove());
+    }
+
+    function incrementScore(){
+      score++; scoreEl.textContent = score;
+      startConfetti(6);
+      if(score >= targetCount){
+        // win!
+        stopGame();
+        revealBox.style.display='flex';
+        // bigger confetti + sparkle
+        startConfetti(220);
+      }
+    }
+
+    playBtn.addEventListener('click', ()=>{ startGame(); });
+
+    // --- confetti implementation (simple) ---
+    const Confetti = (canvas)=>{
+      const ctx = canvas.getContext('2d');
+      let w=canvas.width=canvas.clientWidth; let h=canvas.height=canvas.clientHeight;
+      window.addEventListener('resize', ()=>{ w=canvas.width=canvas.clientWidth; h=canvas.height=canvas.clientHeight; });
+      let particles = [];
+      function add(n){
+        for(let i=0;i<n;i++) particles.push({
+          x: random(0,w), y: random(-h,0), vx: random(-60,60), vy: random(30,160), size: random(6,14), color: ['#FF7AB6','#FFD37A','#C9EAFF','#B9FFCF'][Math.floor(Math.random()*4)], rot:random(0,Math.PI*2), vr:random(-0.12,0.12), life:random(1.8,3.2)
+        });
+      }
+      function tick(dt){
+        ctx.clearRect(0,0,w,h);
+        for(let i=particles.length-1;i>=0;i--){
+          const p=particles[i];
+          p.x += p.vx*dt; p.y += p.vy*dt; p.vy += 120*dt; p.rot += p.vr; p.life -= dt;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.7);
+          ctx.restore();
+          if(p.y>h+50 || p.life<=0) particles.splice(i,1);
+        }
+      }
+      let last = performance.now();
+      let raf = null;
+      function loop(now){
+        const dt = Math.min(0.033,(now-last)/1000); last = now; tick(dt); raf=requestAnimationFrame(loop);
+      }
+      function start(){ if(!raf) { last=performance.now(); raf=requestAnimationFrame(loop); } }
+      function stop(){ if(raf){ cancelAnimationFrame(raf); raf=null; } }
+      return {add,start,stop};
+    }
+
+    const conf = Confetti(confettiCanvas);
+    function startConfetti(n){ conf.add(n); conf.start(); setTimeout(()=>{ /* allow confetti to fade */ }, 2500); }
+
+    // small accessibility: allow pressing space to generate a star (for fun)
+    window.addEventListener('keydown',(e)=>{ if(e.code==='Space'){ createStar(); e.preventDefault(); } });
+
+    // initial small confetti to make it joyful on page load
+    setTimeout(()=>startConfetti(20),700);
+
+    // personalize page title briefly
+    document.title = `Selamat Ulang Tahun, ${name}!`;
+  </script>
+  <script src="https://cdn.rawgit.com/bungfrangki/efeksalju/2a7805c7/efek-salju.js" type="text/javascript"></script>
+</body>
+</html>
